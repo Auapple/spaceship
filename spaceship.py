@@ -198,6 +198,13 @@ redshoot = 0
 grayshoot = 0
 allsprite = pg.sprite.Group()
 crashing = pg.sprite.Group()
+redships = pg.sprite.Group()
+grayships = pg.sprite.Group()
+rockets = pg.sprite.Group()
+meteors = pg.sprite.Group()
+rocks = pg.sprite.Group()
+enemybius = pg.sprite.Group()
+
 # from here
 redshipy = random.randint(0,674)
 grayshipy = random.randint(0,660)
@@ -222,6 +229,11 @@ allsprite.add(rocket)
 allsprite.add(meteor)
 allsprite.add(rock)
 allsprite.add(fireball)
+redships.add(redship)
+grayships.add(grayship)
+rockets.add(rocket)
+meteors.add(meteor)
+rocks.add(rock)
 # to here
 ship = Ship()
 allsprite.add(ship)
@@ -230,11 +242,11 @@ allsprite.draw(screen)
 #the get shot part
 shipy = ship.rect.y
 bullet = Bullet(shipy)
-redshipshot = pg.sprite.collide_rect(bullet, redship)
-grayshipshot = pg.sprite.collide_rect(bullet, grayship)
-rocketshot = pg.sprite.collide_rect(bullet, rocket)
-meteorshot = pg.sprite.collide_rect(bullet, meteor)
-rockshot = pg.sprite.collide_rect(bullet, rock)
+redshipshot = pg.sprite.spritecollide(bullet, redships, False)
+grayshipshot = pg.sprite.spritecollide(bullet, grayships, False)
+rocketshot = pg.sprite.spritecollide(bullet, rockets, False)
+meteorshot = pg.sprite.spritecollide(bullet, meteors, False)
+rockshot = pg.sprite.spritecollide(bullet, rocks, False)
 fireballshot = pg.sprite.collide_rect(bullet, fireball)
 
 #the running and settings part
@@ -247,13 +259,14 @@ diebyfireball = pg.sprite.collide_rect(ship, fireball)
 score = 0
 font = pg.font.SysFont("Arial",50)
 level1 = True
+level2 = True
 
 # game run part
 while running:
-	clock.tick(60)
+	clock.tick(90)
 	crash = pg.sprite.spritecollide(ship, crashing, True)
 	disappear = pg.sprite.spritecollide(bullet, crashing, True)
-	if enemy > 120:
+	if enemy > 600:
 		# from here
 		redshipy = random.randint(0,674)
 		grayshipy = random.randint(0,660)
@@ -270,6 +283,11 @@ while running:
 		crashing.add(rocket)
 		crashing.add(meteor)
 		crashing.add(rock)
+		redships.add(redship)
+		grayships.add(grayship)
+		rockets.add(rocket)
+		meteors.add(meteor)
+		rocks.add(rock)
 		allsprite.add(redship)
 		allsprite.add(grayship)
 		allsprite.add(rocket)
@@ -308,11 +326,12 @@ while running:
 		allsprite.remove(bullet)
 	if diebyfireball:
 		running = False
-	redshipshot = pg.sprite.collide_rect(bullet, redship)
-	grayshipshot = pg.sprite.collide_rect(bullet, grayship)
-	rocketshot = pg.sprite.collide_rect(bullet, rocket)
-	meteorshot = pg.sprite.collide_rect(bullet, meteor)
-	rockshot = pg.sprite.collide_rect(bullet, rock)
+
+	redshipshot = pg.sprite.spritecollide(bullet, redships, False)
+	grayshipshot = pg.sprite.spritecollide(bullet, grayships, False)
+	rocketshot = pg.sprite.spritecollide(bullet, rockets, False)
+	meteorshot = pg.sprite.spritecollide(bullet, meteors, False)
+	rockshot = pg.sprite.spritecollide(bullet, rocks, False)
 	fireballshot = pg.sprite.collide_rect(bullet, fireball)
 
 	# the enemybiu part
@@ -367,6 +386,9 @@ while running:
 
 	if rockshot:
 		rock.health -= 10
+	#for i in rocksprites:
+		#if i.health <=0:
+			#rocksprites.remove(i)
 	if rock.health <= 0:
 		crashing.remove(rock)
 		allsprite.remove(rock)
