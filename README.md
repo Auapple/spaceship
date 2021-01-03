@@ -3,9 +3,9 @@
 
 to do list
 
-1. Bullet hurt enemies
-2.	Ship health
-3.	Points
-4.	Enemy biu
-5.	Levels
-6.	Biu crash explooosion!
+1. biu crash disappear
+2. nothing
+3. nothing
+4. ship die explooooosion!!!
+5. ship die explooooosion!!!
+6. level
