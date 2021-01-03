@@ -3,12 +3,9 @@
 
 to do list
 
-1. find spaceship, meteor, and bullet
-
-2.X
-
-3.X
-
-4.code spaceship movement
-
-5.code meteor and bullet fire
+1. Bullet hurt enemies
+2.	Ship health
+3.	Points
+4.	Enemy biu
+5.	Levels
+6.	Biu crash explooosion!
