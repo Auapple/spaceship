@@ -7,7 +7,11 @@ pg.display.set_caption('galaxy spaceship')
 bg = pg.image.load("bestgalaxy.png")
 bg = pg.transform.scale(bg,(1400,800))
 screen.blit(bg, (0,0))
-
+explo1 = pg.image.load('explosion1.png')
+explo2 = pg.image.load('explosion2.jfif')
+explo3 = pg.image.load('explosion3.jpg')
+explo4 = pg.image.load('explosion4.jpg')
+picture = [explo1,explo2,explo3,explo4]
 
 #Class part
 class Ship(pg.sprite.Sprite):
@@ -185,14 +189,37 @@ class Fireball(pg.sprite.Sprite):
 		self.image = pg.transform.scale(self.image,(1600,800))
 		self.x =1450
 		self.y = 0
-		self.speed = 3
+		self.speed = 2
 		self.rect = self.image.get_rect()
 		self.rect.x = 1450
 		self.rect.y = 0
-		self.health = 3000
+		self.health = 1500
 
 	def update(self):
 		self.rect.x -= self.speed
+
+class Explosion(pg.sprite.Sprite):
+
+	def __init__(self,explox,exploy):
+		pg.sprite.Sprite.__init__(self)
+		self.image = pg.image.load('explosion1.png')
+		self.image = pg.transform.scale(self.image,(100,100))
+		self.rect = self.image.get_rect()
+		self.rect.x = explox
+		self.rect.y = exploy
+		explo1 = pg.image.load('explosion1.png')
+		explo2 = pg.image.load('explosion2.jfif')
+		explo3 = pg.image.load('explosion3.jpg')
+		explo4 = pg.image.load('explosion4.jpg')
+		picture = [explo1,explo2,explo3,explo4]
+		self.count = 0
+
+	def update(self):
+		if self.count < 4:
+			self.image = picture[self.count]
+			self.image = pg.transform.scale(self.image,(100,100))
+			self.count += 1
+
 
 #The sprite part
 enemy = 0
@@ -205,8 +232,13 @@ grayships = pg.sprite.Group()
 rockets = pg.sprite.Group()
 meteors = pg.sprite.Group()
 rocks = pg.sprite.Group()
+fireballs = pg.sprite.Group()
 enemybius = pg.sprite.Group()
 bullets = pg.sprite.Group()
+explosions = pg.sprite.Group()
+explox = 200
+exploy = 200
+
 
 # from here
 redshipy = random.randint(0,674)
@@ -237,6 +269,7 @@ grayships.add(grayship)
 rockets.add(rocket)
 meteors.add(meteor)
 rocks.add(rock)
+fireballs.add(fireball)
 # to here
 ship = Ship()
 allsprite.add(ship)
@@ -315,14 +348,8 @@ while running:
 	if ship.health <= 0:
 		running = False
 	if diebyfireball:
-		running = False
+		ship.health = 0
 
-	# redshipshot = pg.sprite.spritecollide(bullet, redships, False)
-	# grayshipshot = pg.sprite.spritecollide(bullet, grayships, False)
-	# rocketshot = pg.sprite.spritecollide(bullet, rockets, False)
-	# meteorshot = pg.sprite.spritecollide(bullet, meteors, False)
-	# rockshot = pg.sprite.spritecollide(bullet, rocks, False)
-	#fireballshot = pg.sprite.collide_rect(bullet, fireball)
 
 	# the enemy part
 	for i in redships:
@@ -335,10 +362,16 @@ while running:
 			redbiu = Redbiu(redshipy,redshipx)
 			crashing.add(redbiu)
 			allsprite.add(redbiu)
+			enemybius.add(redbiu)
 			i.redshoot = 0
 		if i.health <= 0:
 			redships.remove(i)
 			allsprite.remove(i)
+			explox = redship.rect.x
+			exploy = redship.rect.y
+			explosion = Explosion(explox,exploy)
+			allsprite.add(explosion)
+			explosions.add(explosion)
 			score += 100
 	redships.update()
 
@@ -352,10 +385,16 @@ while running:
 			graybiu = Graybiu(grayshipy,grayshipx)
 			crashing.add(graybiu)
 			allsprite.add(graybiu)
+			enemybius.add(graybiu)
 			i.grayshoot = 0
 		if i.health <= 0:
 			grayships.remove(i)
 			allsprite.remove(i)
+			explox = grayship.rect.x
+			exploy = grayship.rect.y
+			explosion = Explosion(explox,exploy)
+			allsprite.add(explosion)
+			explosions.add(explosion)
 			score += 70
 	grayships.update()
 
@@ -367,6 +406,11 @@ while running:
 		if i.health <= 0:
 			rockets.remove(i)
 			allsprite.remove(i)
+			explox = rocket.rect.x
+			exploy = rocket.rect.y
+			explosion = Explosion(explox,exploy)
+			allsprite.add(explosion)
+			explosions.add(explosion)
 			score += 20
 	rockets.update()
 
@@ -390,6 +434,36 @@ while running:
 			score += 40
 	rocks.update()
 
+	for i in fireballs:
+		fireballhit = pg.sprite.spritecollide(i,bullets,True)
+		if fireballhit:
+			i.health -= 10
+		if i.health <= 0:
+			fireballs.remove(i)
+			allsprite.remove(i)
+	fireballs.update()
+
+
+	# the bullet crash part
+	for i in bullets:
+		bullethit = pg.sprite.spritecollide(i,enemybius,True)
+		if bullethit:
+			bullets.remove(i)
+			allsprite.remove(i)
+
+	for i in enemybius:
+		enemybiuhit = pg.sprite.spritecollide(i,bullets,True)
+		if enemybiuhit:
+			enemybius.remove(i)
+			allsprite.remove(i)
+	enemybius.update()
+
+	for i in explosions:
+		if i.count >= 3:
+			explosions.remove(i)
+			allsprite.remove(i)
+	explosions.update()
+
 
 	# the level part
 	if level1:
@@ -397,6 +471,7 @@ while running:
 			fireball = Fireball()
 			crashing.add(fireball)
 			allsprite.add(fireball)
+			fireballs.add(fireball)
 			level1 = False
 	shipy = ship.rect.y
 	bullet = Bullet(shipy) 
