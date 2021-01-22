@@ -86,7 +86,7 @@ class Rock(pg.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.x = 1450
 		self.rect.y = rocy
-		self.health = 100
+		self.health = 150
 
 	def update(self):
 		self.rect.x -= self.speed
@@ -180,6 +180,23 @@ class Graybiu(pg.sprite.Sprite):
 		self.rect.x -= self.speed
 
 
+class Bossbiu(pg.sprite.Sprite):
+
+	def __init__(self,bossy,bossx):
+		pg.sprite.Sprite.__init__(self)
+		self.image = pg.image.load('enemybiu.png')
+		self.image = pg.transform.scale(self.image,(42,30))
+		self.x = bossx
+		self.y = bossy
+		self.speed = 30
+		self.rect = self.image.get_rect()
+		self.rect.x = bossx
+		self.rect.y = bossy
+
+	def update(self):
+		self.rect.x -= self.speed
+
+
 class Fireball(pg.sprite.Sprite):
 
 	def __init__(self):
@@ -193,6 +210,24 @@ class Fireball(pg.sprite.Sprite):
 		self.rect.x = 1450
 		self.rect.y = 0
 		self.health = 3000
+
+	def update(self):
+		self.rect.x -= self.speed
+
+
+class Fireflake(pg.sprite.Sprite):
+
+	def __init__(self,x,y):
+		pg.sprite.Sprite.__init__(self)
+		self.image = pg.image.load('fireball.png')
+		self.image = pg.transform.scale(self.image,(600,300))
+		self.x = x
+		self.y = y
+		self.speed = 4
+		self.rect = self.image.get_rect()
+		self.rect.x = x
+		self.rect.y = y
+		self.health = 1000
 
 	def update(self):
 		self.rect.x -= self.speed
@@ -231,12 +266,29 @@ class Boss(pg.sprite.Sprite):
 		self.count = 0
 		self.speed = 2
 		self.bossshoot = 0
-		self.health = 4000
+		self.bossrocket = 0
+		self.health = 3000
 
 	def update(self):
 		if self.rect.x >= 700:
 			self.rect.x -= self.speed
 
+class Missile(pg.sprite.Sprite):
+
+	def __init__(self,y,bossx):
+		pg.sprite.Sprite.__init__(self)
+		self.image = pg.image.load("rocket.png")
+		self.image = pg.transform.scale(self.image,(100,60))
+		self.x = bossx
+		self.speed = 20
+		self.y = missiley
+		self.rect = self.image.get_rect()
+		self.rect.x = bossx
+		self.rect.y = missiley
+		self.health = 1
+
+	def update(self):
+		self.rect.x -= self.speed
 
 
 #The sprite part
@@ -251,10 +303,12 @@ rockets = pg.sprite.Group()
 meteors = pg.sprite.Group()
 rocks = pg.sprite.Group()
 fireballs = pg.sprite.Group()
+fireflakes = pg.sprite.Group()
 enemybius = pg.sprite.Group()
 bullets = pg.sprite.Group()
 explosions = pg.sprite.Group()
 bosses = pg.sprite.Group()
+missiles = pg.sprite.Group()
 explox = 200
 exploy = 200
 
@@ -268,6 +322,7 @@ rocy = random.randint(0,728)
 redship = Redship(redshipy)
 grayship = Grayship(grayshipy)
 fireball = Fireball()
+fireflake = Fireflake(0,0)
 boss = Boss()
 rocket = Rocket(rockey)
 meteor = Meteor(meteoy)
@@ -277,13 +332,11 @@ crashing.add(grayship)
 crashing.add(rocket)
 crashing.add(meteor)
 crashing.add(rock)
-#crashing.add(fireball)
 allsprite.add(redship)
 allsprite.add(grayship)
 allsprite.add(rocket)
 allsprite.add(meteor)
 allsprite.add(rock)
-#allsprite.add(fireball)
 redships.add(redship)
 grayships.add(grayship)
 rockets.add(rocket)
@@ -302,15 +355,19 @@ clock = pg.time.Clock()
 keys = pg.key.get_pressed()
 score = 0
 font = pg.font.SysFont("Arial",50)
+winning = pg.font.SysFont('Arial',350)
 level1 = True
 level2 = True
+level3 = True
+win = False
 
 # game run part
 while running:
 	clock.tick(90)
-	#diebyfireball = pg.sprite.collide_rect(ship, fireball)
+	diebyfireball = pg.sprite.collide_rect(ship, fireball)
+	diebyfireflake = pg.sprite.collide_rect(ship,fireflake)
 	crash = pg.sprite.spritecollide(ship, crashing, True)
-	if enemy > 600:
+	if enemy > 1200:
 		# from here
 		redshipy = random.randint(0,674)
 		grayshipy = random.randint(0,660)
@@ -338,7 +395,7 @@ while running:
 		allsprite.add(meteor)
 		allsprite.add(rock)
 		# to here
-		enemy = 0		
+		enemy = 0
 	enemy += 1
 	text = font.render('score:' + str(score), True, (212,201,106))
 	text.set_alpha(127)
@@ -352,23 +409,27 @@ while running:
 	
 	# the ship part
 	keys = pg.key.get_pressed()
-	if keys[pg.K_s]:
-		if ship.rect.y <= 674:
-			Ship.movedown(ship)
-	if keys[pg.K_w]:
-		if ship.rect.y >= 0:
-			Ship.moveup(ship)
-	if keys[pg.K_SPACE]:
-		shipy = ship.rect.y
-		bullet = Bullet(shipy)
-		bullets.add(bullet)
-		allsprite.add(bullet)
+	if win == False:
+		if keys[pg.K_s]:
+			if ship.rect.y <= 674:
+				Ship.movedown(ship)
+		if keys[pg.K_w]:
+			if ship.rect.y >= 0:
+				Ship.moveup(ship)
+		if keys[pg.K_SPACE]:
+			shipy = ship.rect.y
+			bullet = Bullet(shipy)
+			bullets.add(bullet)
+			allsprite.add(bullet)
 	if crash:
 		ship.health -= 20
 	if ship.health <= 0:
 		running = False
-	#if diebyfireball:
-		#ship.health = 0
+		print('died')
+	if diebyfireball:
+		ship.health = 0
+	if diebyfireflake:
+		ship.health = 0
 
 
 	# the enemy part
@@ -387,11 +448,12 @@ while running:
 		if i.health <= 0:
 			redships.remove(i)
 			allsprite.remove(i)
-			explox = redship.rect.x
-			exploy = redship.rect.y
+			explox = i.rect.x
+			exploy = i.rect.y
 			explosion = Explosion(explox,exploy)
 			allsprite.add(explosion)
 			explosions.add(explosion)
+			crashing.add(explosion)
 			score += 100
 
 	for i in grayships:
@@ -409,11 +471,12 @@ while running:
 		if i.health <= 0:
 			grayships.remove(i)
 			allsprite.remove(i)
-			explox = grayship.rect.x
-			exploy = grayship.rect.y
+			explox = i.rect.x
+			exploy = i.rect.y
 			explosion = Explosion(explox,exploy)
 			allsprite.add(explosion)
 			explosions.add(explosion)
+			crashing.add(explosion)
 			score += 70
 
 	for i in rockets:
@@ -423,11 +486,12 @@ while running:
 		if i.health <= 0:
 			rockets.remove(i)
 			allsprite.remove(i)
-			explox = rocket.rect.x
-			exploy = rocket.rect.y
+			explox = i.rect.x
+			exploy = i.rect.y
 			explosion = Explosion(explox,exploy)
 			allsprite.add(explosion)
 			explosions.add(explosion)
+			crashing.add(explosion)
 			score += 20
 
 	for i in meteors:
@@ -446,23 +510,7 @@ while running:
 		if i.health <= 0:
 			rocks.remove(i)
 			allsprite.remove(i)
-			score += 40
-
-	for i in fireballs:
-		fireballhit = pg.sprite.spritecollide(i,bullets,True)
-		if fireballhit:
-			i.health -= 10
-		if i.health <= 0:
-			fireballs.remove(i)
-			allsprite.remove(i)
-
-	for i in bosses:
-		bosshit = pg.sprite.spritecollide(i,bullets,True)
-		if bosshit:
-			i.health -= 10
-		if i.health <= 0:
-			bosses.remove(i)
-			allsprite.remove(i)
+			score += 30
 
 
 	# the bullet crash part
@@ -477,13 +525,13 @@ while running:
 		if enemybiuhit:
 			enemybius.remove(i)
 			allsprite.remove(i)
-	enemybius.update()
+			crashing.remove(i)
 
 	for i in explosions:
-		if i.count >= 3:
+		if i.count >= 4:
 			explosions.remove(i)
 			allsprite.remove(i)
-	explosions.update()
+			crashing.remove(i)
 
 
 	# the level part
@@ -495,15 +543,110 @@ while running:
 			fireballs.add(fireball)
 			level1 = False
 	if level2:
-		if score >= 100:
+		if score >= 20:
 			boss = Boss()
 			crashing.add(boss)
 			allsprite.add(boss)
 			bosses.add(boss)
 			level2 = False
+
+
+	# the boss part
+	for i in fireballs:
+		fireballhit = pg.sprite.spritecollide(i,bullets,True)
+		fireballx = i.rect.x
+		if fireballhit:
+			i.health -= 10
+		if i.health <= 0:
+			fireballs.remove(i)
+			allsprite.remove(i)
+			crashing.remove(i)
+			fireflake = Fireflake(fireballx,0)
+			allsprite.add(fireflake)
+			crashing.add(fireflake)
+			fireflakes.add(fireflake)
+			fireflake = Fireflake(fireballx + 150,300)
+			allsprite.add(fireflake)
+			crashing.add(fireflake)
+			fireflakes.add(fireflake)
+			fireflake = Fireflake(fireballx + 100,500)
+			allsprite.add(fireflake)
+			crashing.add(fireflake)
+			fireflakes.add(fireflake)
+
+	for i in fireflakes:
+		fireflakehit = pg.sprite.spritecollide(i,bullets,True)
+		if fireflakehit:
+			i.health -= 10
+		if i.health <= 0:
+			fireflakes.remove(i)
+			allsprite.remove(i)
+			crashing.remove(i)
+
+	for i in bosses:
+		bosshit = pg.sprite.spritecollide(i,bullets,True)
+		if bosshit:
+			i.health -= 10
+		i.bossshoot += 1
+		i.bossrocket += 1
+		if i.bossshoot >= 25:
+			bossx = i.rect.x
+			bossy = i.rect.y
+			bossx += 115
+			bossy += 207
+			bossbiu = Bossbiu(bossy,bossx)
+			crashing.add(bossbiu)
+			allsprite.add(bossbiu)
+			enemybius.add(bossbiu)
+			bossx -= 154
+			bossy += 178
+			bossbiu = Bossbiu(bossy,bossx)
+			crashing.add(bossbiu)
+			allsprite.add(bossbiu)
+			enemybius.add(bossbiu)
+			bossx += 154
+			bossy += 178
+			bossbiu = Bossbiu(bossy,bossx)
+			crashing.add(bossbiu)
+			allsprite.add(bossbiu)
+			enemybius.add(bossbiu)
+			i.bossshoot = 0
+		if i.bossrocket >= 4:
+			bossx = boss.rect.x
+			bossx += 400
+			missiley = random.randint(0,740)
+			missile = Missile(missiley,bossx)
+			crashing.add(missile)
+			allsprite.add(missile)
+			missiles.add(missile)
+			i.bossrocket = 0
+		if i.health <= 0:
+			bosses.remove(i)
+			allsprite.remove(i)
+
+	for i in missiles:
+		missilehit = pg.sprite.spritecollide(i,bullets,True)
+		if missilehit:
+			i.health -= 10
+		if i.health <= 0:
+			missiles.remove(i)
+			allsprite.remove(i)
+			explox = i.rect.x
+			exploy = i.rect.y
+			explosion = Explosion(explox,exploy)
+			allsprite.add(explosion)
+			explosions.add(explosion)
+			crashing.add(explosion)
+
+			
+	# last running part
 	shipy = ship.rect.y
-	bullet = Bullet(shipy) 
-	allsprite.update()
+	bullet = Bullet(shipy)
+	if win == False:
+		allsprite.update()
+	if win == True:
+		hooray = winning.render('YOU WIN', True, (255,0,0))
+		bg.blit(hooray,(100,200))
 	screen.blit(bg, (0,0))
 	allsprite.draw(screen)
 	for event in pg.event.get():
