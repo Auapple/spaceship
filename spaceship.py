@@ -4,14 +4,16 @@ pg.init()
 #Game display part
 screen = pg.display.set_mode([1400,800])
 pg.display.set_caption('galaxy spaceship')
-bg = pg.image.load("bestgalaxy.png")
-bg = pg.transform.scale(bg,(1400,800))
+galaxy = pg.image.load("bestgalaxy.png")
+bg = pg.transform.scale(galaxy,(1400,800))
 screen.blit(bg, (0,0))
 explo1 = pg.image.load('explosion1.png')
 explo2 = pg.image.load('explosion2.png')
 explo3 = pg.image.load('explosion3.png')
 explo4 = pg.image.load('explosion4.png')
 picture = [explo1,explo2,explo3,explo4]
+bullpic = pg.image.load('bullet.png')
+bullpic = pg.transform.scale(bullpic,(37,17))
 
 #Class part
 class Ship(pg.sprite.Sprite):
@@ -26,7 +28,7 @@ class Ship(pg.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.x = 50
 		self.rect.y = 337
-		self.health = 100
+		self.health = 10000
 		self.speed = 16
 
 	def moveup(self):
@@ -95,9 +97,8 @@ class Bullet(pg.sprite.Sprite):
 
 	def __init__(self,y):
 		pg.sprite.Sprite.__init__(self)
-		self.image = pg.image.load('bullet.png')
-		self.image = pg.transform.scale(self.image,(37,17))
-		self.x =146
+		self.image = bullpic
+		self.x = 146
 		self.y = shipy
 		self.speed = 30
 		self.rect = self.image.get_rect()
@@ -277,8 +278,8 @@ class Missile(pg.sprite.Sprite):
 
 	def __init__(self,y,bossx):
 		pg.sprite.Sprite.__init__(self)
-		self.image = pg.image.load("rocket.png")
-		self.image = pg.transform.scale(self.image,(100,60))
+		self.image = pg.image.load("missile.png")
+		self.image = pg.transform.scale(self.image,(100,28))
 		self.x = bossx
 		self.speed = 20
 		self.y = missiley
@@ -295,6 +296,7 @@ class Missile(pg.sprite.Sprite):
 enemy = 0
 redshoot = 0
 grayshoot = 0
+cog = 0
 allsprite = pg.sprite.Group()
 crashing = pg.sprite.Group()
 redships = pg.sprite.Group()
@@ -362,13 +364,11 @@ level3 = True
 second = 0
 movement = True
 win = False
-bg = pg.image.load("bestgalaxy.png")
-bg = pg.transform.scale(bg,(1400,800))
-screen.blit(bg, (0,0))
+
 
 # game run part
 while running:
-	clock.tick(90)
+	clock.tick(60)
 	diebyfireball = pg.sprite.collide_rect(ship, fireball)
 	diebyfireflake = pg.sprite.collide_rect(ship,fireflake)
 	crash = pg.sprite.spritecollide(ship, crashing, True)
@@ -402,12 +402,12 @@ while running:
 		# to here
 		enemy = 0
 	enemy += 1
+	cog += 1
 	text = font.render('score:' + str(score), True, (212,201,106))
 	text.set_alpha(127)
 	health = font.render('health:' + str(ship.health), True, (212,201,106))
 	health.set_alpha(127)
-	bg = pg.image.load("bestgalaxy.png")
-	bg = pg.transform.scale(bg,(1400,800))
+	bg = pg.transform.scale(galaxy,(1400,800))
 	bg.blit(text,(130,10))
 	bg.blit(health,(400,10))
 	pg.display.update()
@@ -438,8 +438,25 @@ while running:
 	if diebyfireflake:
 		ship.health = 0
 
-
 	# the enemy part
+	for i in allsprite:
+		if i.rect.x <= -600:
+			allsprite.remove(i)
+	for i in crashing:
+		if i.rect.x <= -600:
+			crashing.remove(i)
+	for i in enemybius:
+		if i.rect.x <= -600:
+			enemybius.remove(i)
+	for i in redships:
+		if i.rect.x <= -600:
+			redships.remove(i)
+	for i in grayships:
+		if i.rect.x <= -600:
+			grayships.remove(i)
+	# for i in :
+	# 	if i.rect.x <= -600:
+	# 		.remove(i)
 	for i in redships:
 		redhit = pg.sprite.spritecollide(i,bullets,True)
 		if redhit:
@@ -447,7 +464,7 @@ while running:
 		i.redshoot += 1
 		if i.redshoot >= 20:
 			redshipx = i.rect.x
-			redbiu = Redbiu(redshipy,redshipx)
+			redbiu = Redbiu(i.rect.y,i.rect.x)
 			crashing.add(redbiu)
 			allsprite.add(redbiu)
 			enemybius.add(redbiu)
@@ -470,7 +487,7 @@ while running:
 		i.grayshoot += 1
 		if i.grayshoot >= 40:
 			grayshipx = i.rect.x
-			graybiu = Graybiu(grayshipy,grayshipx)
+			graybiu = Graybiu(i.rect.y,i.rect.x)
 			crashing.add(graybiu)
 			allsprite.add(graybiu)
 			enemybius.add(graybiu)
@@ -543,7 +560,7 @@ while running:
 
 	# the level part
 	if level1:
-		if score >= 50:
+		if score >= 500:
 			second += 1
 			#movement = False
 			if second <= 30:
@@ -551,8 +568,7 @@ while running:
 				bg.blit(warning,(30,200))
 				screen.blit(bg, (0,0))
 			if second > 30 and second <= 60:
-				bg = pg.image.load("bestgalaxy.png")
-				bg = pg.transform.scale(bg,(1400,800))
+				bg = pg.transform.scale(galaxy,(1400,800))
 				text = font.render('score:' + str(score), True, (212,201,106))
 				text.set_alpha(127)
 				health = font.render('health:' + str(ship.health), True, (212,201,106))
@@ -565,8 +581,7 @@ while running:
 				bg.blit(incoming,(-30,400))
 				screen.blit(bg, (0,0))
 			if second > 60 and second <= 90:
-				bg = pg.image.load("bestgalaxy.png")
-				bg = pg.transform.scale(bg,(1400,800))
+				bg = pg.transform.scale(galaxy,(1400,800))
 				text = font.render('score:' + str(score), True, (212,201,106))
 				text.set_alpha(127)
 				health = font.render('health:' + str(ship.health), True, (212,201,106))
@@ -579,8 +594,7 @@ while running:
 				bg.blit(upgraded,(-15,400))
 				screen.blit(bg, (0,0))
 			if second > 90 and second <= 120:
-				bg = pg.image.load("bestgalaxy.png")
-				bg = pg.transform.scale(bg,(1400,800))
+				bg = pg.transform.scale(galaxy,(1400,800))
 				text = font.render('score:' + str(score), True, (212,201,106))
 				text.set_alpha(127)
 				health = font.render('health:' + str(ship.health), True, (212,201,106))
@@ -588,13 +602,12 @@ while running:
 				bg.blit(text,(130,10))
 				bg.blit(health,(400,10))
 				sped = bigword.render('SPEED', True, (255,0,0))
-				more = bigword.render('16 --> 20', True, (255,0,0))
+				more = bigword.render('16 --> 24', True, (255,0,0))
 				bg.blit(sped,(200,0))
 				bg.blit(more,(100,400))
 				screen.blit(bg, (0,0))
 			if second > 120:
-				bg = pg.image.load("bestgalaxy.png")
-				bg = pg.transform.scale(bg,(1400,800))
+				bg = pg.transform.scale(galaxy,(1400,800))
 				text = font.render('score:' + str(score), True, (212,201,106))
 				text.set_alpha(127)
 				health = font.render('health:' + str(ship.health), True, (212,201,106))
@@ -606,20 +619,19 @@ while running:
 				crashing.add(fireball)
 				allsprite.add(fireball)
 				fireballs.add(fireball)
-				ship.speed = 20
+				ship.speed = 24
 				movement = True
 				second = 0
 				level1 = False
 	if level2:
-		if score >= 2000:
+		if score >= 1000:
 			second += 1
 			#movement = False
 			if second <= 30:
 				bg.blit(warning,(30,200))
 				screen.blit(bg, (0,0))
-			if second > 30:
-				bg = pg.image.load("bestgalaxy.png")
-				bg = pg.transform.scale(bg,(1400,800))
+			if second > 30 and second <= 60:
+				bg = pg.transform.scale(galaxy,(1400,800))
 				text = font.render('score:' + str(score), True, (212,201,106))
 				text.set_alpha(127)
 				health = font.render('health:' + str(ship.health), True, (212,201,106))
@@ -630,9 +642,8 @@ while running:
 				bg.blit(shipboss,(-20,0))
 				bg.blit(incoming,(-30,400))
 				screen.blit(bg, (0,0))
-			if second > 60:
-				bg = pg.image.load("bestgalaxy.png")
-				bg = pg.transform.scale(bg,(1400,800))
+			if second > 60 and second <= 90:
+				bg = pg.transform.scale(galaxy,(1400,800))
 				text = font.render('score:' + str(score), True, (212,201,106))
 				text.set_alpha(127)
 				health = font.render('health:' + str(ship.health), True, (212,201,106))
@@ -642,22 +653,20 @@ while running:
 				bg.blit(sheep,(400,0))
 				bg.blit(upgraded,(-15,400))
 				screen.blit(bg, (0,0))
-			if second > 90:
-				bg = pg.image.load("bestgalaxy.png")
-				bg = pg.transform.scale(bg,(1400,800))
+			if second > 90 and second <= 120:
+				bg = pg.transform.scale(galaxy,(1400,800))
 				text = font.render('score:' + str(score), True, (212,201,106))
 				text.set_alpha(127)
 				health = font.render('health:' + str(ship.health), True, (212,201,106))
 				health.set_alpha(127)
 				bg.blit(text,(130,10))
 				bg.blit(health,(400,10))
-				more = bigword.render('20 --> 24', True, (255,0,0))
+				more = bigword.render('24 --> 32', True, (255,0,0))
 				bg.blit(sped,(200,0))
 				bg.blit(more,(100,400))
 				screen.blit(bg, (0,0))
 			if second > 120:
-				bg = pg.image.load("bestgalaxy.png")
-				bg = pg.transform.scale(bg,(1400,800))
+				bg = pg.transform.scale(galaxy,(1400,800))
 				text = font.render('score:' + str(score), True, (212,201,106))
 				text.set_alpha(127)
 				health = font.render('health:' + str(ship.health), True, (212,201,106))
@@ -669,7 +678,7 @@ while running:
 				crashing.add(boss)
 				allsprite.add(boss)
 				bosses.add(boss)
-				ship.speed = 24
+				ship.speed = 32
 				level2 = False
 
 
