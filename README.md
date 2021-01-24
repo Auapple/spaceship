@@ -3,9 +3,7 @@
 
 to do list
 
-1. biu crash disappear
-2. nothing
-3. nothing
-4. ship die explooooosion!!!
-5. ship die explooooosion!!!
-6. level
+1. Cogwheel
+2. Weird bullet
+3. Review code, optimize code(delete unnecessary code)
+4. Missile behind boss/ allsprite order
