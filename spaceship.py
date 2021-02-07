@@ -11,6 +11,10 @@ explo1 = pg.image.load('explosion1.png')
 explo2 = pg.image.load('explosion2.png')
 explo3 = pg.image.load('explosion3.png')
 explo4 = pg.image.load('explosion4.png')
+explo1 = pg.transform.scale(explo1,(100,100))
+explo2 = pg.transform.scale(explo2,(100,100))
+explo3 = pg.transform.scale(explo3,(100,100))
+explo4 = pg.transform.scale(explo4,(100,100))
 picture = [explo1,explo2,explo3,explo4]
 bullpic = pg.image.load('bullet.png')
 bullpic = pg.transform.scale(bullpic,(37,17))
@@ -28,7 +32,7 @@ class Ship(pg.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.x = 50
 		self.rect.y = 337
-		self.health = 10000
+		self.health = 100
 		self.speed = 16
 
 	def moveup(self):
@@ -237,15 +241,11 @@ class Explosion(pg.sprite.Sprite):
 
 	def __init__(self,explox,exploy):
 		pg.sprite.Sprite.__init__(self)
-		self.image = pg.image.load('explosion1.png')
-		self.image = pg.transform.scale(self.image,(100,100))
+		global picture
+		self.image = picture[0]
 		self.rect = self.image.get_rect()
 		self.rect.x = explox
 		self.rect.y = exploy
-		explo1 = pg.image.load('explosion1.png')
-		explo2 = pg.image.load('explosion2.png')
-		explo3 = pg.image.load('explosion3.png')
-		explo4 = pg.image.load('explosion4.png')
 		picture = [explo1,explo2,explo3,explo4]
 		self.count = 0
 
@@ -254,6 +254,19 @@ class Explosion(pg.sprite.Sprite):
 			self.image = picture[self.count]
 			self.image = pg.transform.scale(self.image,(100,100))
 			self.count += 1
+
+class Cogwheel(pg.sprite.Sprite):
+
+	def __init__(self,cogy):
+		pg.sprite.Sprite.__init__(self)
+		self.image = pg.image.load('cogwheel.jpg')
+		self.image = pg.transform.scale(self.image,(50,50))
+		self.rect = self.image.get_rect()
+		self.rect.x = 1450
+		self.rect.y = cogy
+
+	def update(self):
+		self.rect.x -= 4	
 
 class Boss(pg.sprite.Sprite):
 
@@ -309,6 +322,7 @@ fireflakes = pg.sprite.Group()
 enemybius = pg.sprite.Group()
 bullets = pg.sprite.Group()
 explosions = pg.sprite.Group()
+cogwheels = pg.sprite.Group()
 bosses = pg.sprite.Group()
 missiles = pg.sprite.Group()
 explox = 200
@@ -372,7 +386,8 @@ while running:
 	diebyfireball = pg.sprite.collide_rect(ship, fireball)
 	diebyfireflake = pg.sprite.collide_rect(ship,fireflake)
 	crash = pg.sprite.spritecollide(ship, crashing, True)
-	if enemy > 120:
+	fix = pg.sprite.spritecollide(ship, cogwheels, True)
+	if enemy >= 120:
 		# from here
 		redshipy = random.randint(0,674)
 		grayshipy = random.randint(0,660)
@@ -402,6 +417,12 @@ while running:
 		# to here
 		enemy = 0
 	enemy += 1
+	if cog >= 300:
+		cogy = random.randint(0,750)
+		cogwheel = Cogwheel(cogy)
+		cogwheels.add(cogwheel)
+		allsprite.add(cogwheel)
+		cog = 0
 	cog += 1
 	text = font.render('score:' + str(score), True, (212,201,106))
 	text.set_alpha(127)
@@ -437,6 +458,9 @@ while running:
 		ship.health = 0
 	if diebyfireflake:
 		ship.health = 0
+	if fix:
+		if ship.health < 100:
+			ship.health += 20
 
 	# the enemy part
 	for i in allsprite:
@@ -750,6 +774,8 @@ while running:
 			crashing.add(missile)
 			allsprite.add(missile)
 			missiles.add(missile)
+			allsprite.remove(boss)
+			allsprite.add(boss)
 			i.bossrocket = 0
 		if i.health <= 0:
 			bosses.remove(i)
